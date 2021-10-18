@@ -1,7 +1,7 @@
 import torch
 import pytorch_lightning as pl
 from ranger21 import Ranger21
-from model.transformer_lstm import TransformerLstm, SimpleLstm, TransformerOnly
+from model.transformer_lstm import SimpleLstm, TransformerOnly
 
 
 class VentPressureModel(pl.LightningModule):

@@ -9,8 +9,8 @@ class NeptuneConfig:
     use_neptune: Optional[bool] = None
     api_key: str = os.environ["NEPTUNE_API_KEY"]
     project_name: str = "dongkyuk/vent-pressure"
-    exp_name: Optional[str] = "exp6"
-    description: str = "transformer only with categorical embeddings and bigger"
+    exp_name: Optional[str] = "exp7"
+    description: str = "transformer only with categorical embeddings and bigger models + time2vec pos enc"
 
 
 @dataclass

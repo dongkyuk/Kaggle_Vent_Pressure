@@ -46,3 +46,18 @@ class MlpEncoder(nn.Module):
 
     def forward(self, x):
         return self.encoder(x)
+
+
+class Time2Vec(nn.Module):
+    def __init__(self, input_size, output_size):
+        super().__init__()
+        self.output_size = output_size
+        self.w0 = nn.parameter.Parameter(torch.randn(input_size, 1))
+        self.b0 = nn.parameter.Parameter(torch.randn(input_size, 1))
+        self.w = nn.parameter.Parameter(torch.randn(input_size, output_size-1))
+        self.b = nn.parameter.Parameter(torch.randn(input_size, output_size-1))
+        self.f = torch.sin
+
+    def forward(self, x):
+        time_vec = torch.cat([self.f(torch.matmul(x, self.w) + self.b), torch.matmul(x, self.w0)+self.b0], dim=-1)
+        return time_vec

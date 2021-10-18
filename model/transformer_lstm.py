@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from model.custom_blocks import MlpEncoder
+from model.custom_blocks import MlpEncoder, Time2Vec
 
 
 class IndiviudalFeatureEncoder(nn.Module):
@@ -14,8 +14,9 @@ class IndiviudalFeatureEncoder(nn.Module):
         # Mlp Encoders
         self.u_in_encoder = MlpEncoder(
             input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
-        self.timestep_encoder = MlpEncoder(
-            input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
+        self.timestep_encoder = Time2Vec(input_size, hidden_size)
+        # self.timestep_encoder = MlpEncoder(
+        #     input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
 
     def forward(self, x):
         r_feat = self.r_embedding(x['rs'].int())
