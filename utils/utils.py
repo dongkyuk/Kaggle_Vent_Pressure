@@ -1,6 +1,10 @@
 import pandas as pd
 
 
+def quantize(df):
+    df['u_in'] = df['u_in'].apply(lambda x: round(x, 3))
+    return df
+
 def add_features(df):
     df['cross']= df['u_in'] * df['u_out']
     df['cross2']= df['time_step'] * df['u_out']
@@ -88,3 +92,11 @@ def add_features(df):
     print("Step-8...Completed")
     
     return df
+
+
+df = pd.read_csv('/home/dongkyun/Desktop/Other/Kaggle_Vent_Pressure/data/train.csv')
+print(df.head())
+print(df['u_in'].nunique())
+df = quantize(df)
+print(df.head())
+print(df['u_in'].nunique())

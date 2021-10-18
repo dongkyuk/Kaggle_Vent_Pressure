@@ -16,6 +16,7 @@ from model.vent_pressure_model import VentPressureModel
 from dataset.datamodule import VentPressureDataModule
 from config import register_configs, Config
 
+
 @hydra.main(config_path=None, config_name="config")
 def train(cfg: Config) -> None:
     pl.seed_everything(cfg.trainer_config.seed)
@@ -39,7 +40,7 @@ def train(cfg: Config) -> None:
         deterministic=True,
         max_epochs=cfg.trainer_config.epoch,
         callbacks=[checkpoint_callback],
-        plugins=DDPPlugin(find_unused_parameters=True),
+        plugins=DDPPlugin(find_unused_parameters=False),
         auto_lr_find=True,
         profiler="simple",
         benchmark=True,
