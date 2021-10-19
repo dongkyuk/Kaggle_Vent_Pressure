@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hydra.core.config_store import ConfigStore
 
 
@@ -9,8 +9,8 @@ class NeptuneConfig:
     use_neptune: Optional[bool] = None
     api_key: str = os.environ["NEPTUNE_API_KEY"]
     project_name: str = "dongkyuk/vent-pressure"
-    exp_name: Optional[str] = "exp7"
-    description: str = "transformer only with categorical embeddings and bigger models + time2vec pos enc"
+    exp_name: Optional[str] = "exp8"
+    description: str = "transformer only with categorical embeddings and bigger models + time2vec pos enc concat"
 
 
 @dataclass
@@ -23,9 +23,9 @@ class TrainerConfig:
     fold_num: int = 5
     pin_memory: bool = True
     persistent_workers: bool = True
-    train_batch_size: int = 48
-    val_batch_size: int = 48
-    num_batches_per_epoch: int = 470
+    train_batch_size: int = 80
+    val_batch_size: int = 80
+    num_batches_per_epoch: int = 378
 
 
 @dataclass
@@ -38,8 +38,11 @@ class PathConfig:
 
 @dataclass
 class DataConfig:
-    target_name: str = "pressure"
-
+    target: str = "pressure"
+    timestep: str = "time_step"
+    categorical_features: list = field(default_factory=list)
+    continuous_features: list = field(default_factory=list)
+    
 
 @dataclass
 class Config:
@@ -47,7 +50,8 @@ class Config:
     trainer_config: TrainerConfig = TrainerConfig()
     path_config: PathConfig = PathConfig()
     data_config: DataConfig = DataConfig()
-
+    data_config.categorical_features += ["R", "C", "u_out"]
+    data_config.continuous_features += ["u_in"]
     path_config.save_dir = os.path.join(path_config.save_dir, neptune_config.exp_name)
     os.makedirs(path_config.save_dir, exist_ok=True)
 

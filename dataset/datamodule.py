@@ -43,10 +43,10 @@ class VentPressureDataModule(pl.LightningDataModule):
         if stage == 'fit':
             self.val_df = self.train_df.loc[self.train_df['kfold'] == self.fold]
             self.train_df = self.train_df.loc[self.train_df['kfold'] != self.fold]
-            self.train_dataset = VentPressureDataset(self.train_df)
-            self.val_dataset = VentPressureDataset(self.val_df)
+            self.train_dataset = VentPressureDataset(self.cfg, self.train_df)
+            self.val_dataset = VentPressureDataset(self.cfg, self.val_df)
         elif stage == 'test':
-            self.test_dataset = VentPressureDataset(self.test_df)
+            self.test_dataset = VentPressureDataset(self.cfg, self.test_df)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.cfg.trainer_config.train_batch_size, num_workers=self.cfg.trainer_config.num_workers,

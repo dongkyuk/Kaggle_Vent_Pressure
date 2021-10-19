@@ -17,9 +17,9 @@ class VentPressureModel(pl.LightningModule):
 
     def shared_step(self, batch, batch_idx):
         pressures_pred = self.forward(batch)
-        is_inhale = batch["u_outs"] == 0
+        is_inhale = batch["u_out"] == 0
         loss = self.criterion(
-            pressures_pred[is_inhale], batch['pressures'][is_inhale])
+            pressures_pred[is_inhale], batch['pressure'][is_inhale])
         return loss
 
     def training_step(self, batch, batch_idx):

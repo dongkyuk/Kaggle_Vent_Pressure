@@ -19,11 +19,11 @@ class IndiviudalFeatureEncoder(nn.Module):
         #     input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
 
     def forward(self, x):
-        r_feat = self.r_embedding(x['rs'].int())
-        c_feat = self.c_embedding(x['cs'].int())
-        u_out_feat = self.u_out_embedding(x['u_outs'].int())
-        u_in_feat = self.u_in_encoder(x['u_ins'].unsqueeze(-1))
-        timestep_feat = self.timestep_encoder(x['time_steps'].unsqueeze(-1))
+        r_feat = self.r_embedding(x['R'].int())
+        c_feat = self.c_embedding(x['C'].int())
+        u_out_feat = self.u_out_embedding(x['u_out'].int())
+        u_in_feat = self.u_in_encoder(x['u_in'].unsqueeze(-1))
+        timestep_feat = self.timestep_encoder(x['time_step'].unsqueeze(-1))
         return r_feat, c_feat, u_out_feat, u_in_feat, timestep_feat
 
 
@@ -48,19 +48,19 @@ class TransformerOnly(nn.Module):
         super().__init__()
         # Individual Feature Encoder
         self.indiviudal_feature_encoder = IndiviudalFeatureEncoder(
-            input_size, hidden_size)
+            input_size, int(hidden_size/2))
 
         # Transformer Encoder
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=hidden_size, nhead=12, batch_first=True, dim_feedforward=3072, activation='gelu')
+            d_model=int(hidden_size/2), nhead=4, batch_first=True, dim_feedforward=3072, activation='gelu')
         self.transformer_encoder = nn.TransformerEncoder(
             encoder_layer, num_layers=12)
-        self.pos_embedding = nn.Parameter(torch.randn(1, 5, hidden_size))
-        self.merge_token = nn.Parameter(torch.randn(1, 1, hidden_size))
+        self.pos_embedding = nn.Parameter(torch.randn(1, 5, int(hidden_size/2)))
+        self.merge_token = nn.Parameter(torch.randn(1, 1, int(hidden_size/2)))
 
         # Transformer Decoder
         decoder_layer = nn.TransformerEncoderLayer(
-            d_model=hidden_size, nhead=12, batch_first=True, dim_feedforward=3072, activation='gelu')
+            d_model=hidden_size, nhead=4, batch_first=True, dim_feedforward=3072, activation='gelu')
         self.transformer_decoder = nn.TransformerEncoder(
             decoder_layer, num_layers=12)
 
@@ -74,7 +74,7 @@ class TransformerOnly(nn.Module):
 
         # Fuse the features with transformer encoder
         merge_tokens = self.merge_token.repeat(
-            x['rs'].size(0), x['rs'].size(1), 1)
+            r_feat.size(0), r_feat.size(1), 1)
         feat = torch.stack([merge_tokens, r_feat, c_feat,
                            u_in_feat, u_out_feat], dim=2)
         feat += self.pos_embedding  # [batch_size, seq_len, 6, output_dim]
@@ -83,7 +83,8 @@ class TransformerOnly(nn.Module):
         feat = feat.view(-1, r_feat.shape[1], feat.shape[1])
 
         # Decode with transformer decoder
-        feat += timestep_feat  # [batch_size, seq_len, output_dim]
+        # feat += timestep_feat  # [batch_size, seq_len, output_dim]
+        feat = torch.cat([feat, timestep_feat], dim=-1)
         feat = self.transformer_decoder(feat)
 
         # Pass sequence of fused features to LSTM
