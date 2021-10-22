@@ -1,4 +1,3 @@
-from datetime import time
 import torch
 from torch.utils.data import Dataset
 
@@ -22,6 +21,6 @@ class VentPressureDataset(Dataset):
         continuous_features = {feature: breath[feature].values for feature in self.cfg.data_cfg.continuous_features}
 
         all_features = {**target, **timestep, **categorical_features, **continuous_features}
-        all_features.values() = [torch.tensor(i, dtype='float') for i in all_features.values()]
+        all_features = {feature: torch.tensor(all_features[feature], dtype=torch.float32) for feature in all_features}
 
         return all_features

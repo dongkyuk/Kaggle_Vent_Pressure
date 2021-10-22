@@ -33,7 +33,6 @@ def train(cfg: Config) -> None:
         mode='min',
     )
 
-    # Init trainer
     trainer_args = dict(
         gpus=cfg.trainer_cfg.n_gpus,
         accelerator="ddp",
@@ -52,13 +51,14 @@ def train(cfg: Config) -> None:
             experiment_name=cfg.neptune_cfg.exp_name,
             upload_source_files=glob.glob(os.path.join(get_original_cwd(), '**/*.py'), recursive=True),
             api_key=cfg.neptune_cfg.api_key,
-            description=cfg.neptune_cfg.description
+            params=cfg.trainer_cfg.__dict__,
         )
         trainer_args['logger'] = logger
 
     trainer = pl.Trainer(**trainer_args)
 
-    # trainer.tune(model, datamodule)
+    if cfg.trainer_cfg.tune:
+        trainer.tune(model, datamodule)
 
     trainer.fit(model, datamodule)
 

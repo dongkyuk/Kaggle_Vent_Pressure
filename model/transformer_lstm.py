@@ -58,15 +58,15 @@ class TransformerOnly(nn.Module):
         super().__init__()
         # Individual Feature Encoder
         self.indiviudal_feature_encoder = IndiviudalFeatureEncoder(
-            input_size, int(hidden_size/2))
+            input_size, hidden_size)
 
         # Transformer Encoder
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=int(hidden_size/2), nhead=12, batch_first=True, dim_feedforward=3072, activation='gelu')
+            d_model=hidden_size, nhead=12, batch_first=True, dim_feedforward=3072, activation='gelu')
         self.transformer_encoder = nn.TransformerEncoder(
             encoder_layer, num_layers=12)
-        self.pos_embedding = nn.Parameter(torch.randn(1, 5, int(hidden_size/2)))
-        self.merge_token = nn.Parameter(torch.randn(1, 1, int(hidden_size/2)))
+        self.pos_embedding = nn.Parameter(torch.randn(1, 5, hidden_size))
+        self.merge_token = nn.Parameter(torch.randn(1, 1, hidden_size))
 
         # Transformer Decoder
         decoder_layer = nn.TransformerEncoderLayer(
@@ -93,8 +93,8 @@ class TransformerOnly(nn.Module):
         feat = feat.view(-1, r_feat.shape[1], feat.shape[1])
 
         # Decode with transformer decoder 
-        # feat += timestep_feat  # [batch_size, seq_len, output_dim]
-        feat = torch.cat([feat, timestep_feat], dim=-1)
+        feat += timestep_feat  # [batch_size, seq_len, output_dim]
+        # feat = torch.cat([feat, timestep_feat], dim=-1)
         feat = self.transformer_decoder(feat)
 
         # Final Regression
