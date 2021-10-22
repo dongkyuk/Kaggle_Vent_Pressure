@@ -1,7 +1,6 @@
 import torch
 import pytorch_lightning as pl
-from ranger21 import Ranger21
-from model.transformer_lstm import SimpleLstm, TransformerOnly
+from model.transformer_lstm import SimpleLstm, TransformerOnly, TransformerWithMlp
 
 
 class VentPressureModel(pl.LightningModule):
@@ -34,8 +33,5 @@ class VentPressureModel(pl.LightningModule):
                       prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
-        # optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
-        optimizer = Ranger21(self.parameters(), lr=self.lr,
-                             num_epochs=self.cfg.trainer_config.epoch,
-                             num_batches_per_epoch=self.cfg.trainer_config.num_batches_per_epoch)
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
         return optimizer

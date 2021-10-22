@@ -9,23 +9,23 @@ class NeptuneConfig:
     use_neptune: Optional[bool] = None
     api_key: str = os.environ["NEPTUNE_API_KEY"]
     project_name: str = "dongkyuk/vent-pressure"
-    exp_name: Optional[str] = "exp8"
-    description: str = "transformer only with categorical embeddings and bigger models + time2vec pos enc concat"
+    exp_name: Optional[str] = "only transformer + time2vec concat lstm + constant lr"
+    description: str = ""
 
 
 @dataclass
 class TrainerConfig:
     epoch: int = 1000
-    lr: float = 3e-5
+    lr: float = 1e-5
     n_gpus: int = 2
     num_workers: int = n_gpus * 4
     seed: int = 42
     fold_num: int = 5
     pin_memory: bool = True
     persistent_workers: bool = True
-    train_batch_size: int = 80
-    val_batch_size: int = 80
-    num_batches_per_epoch: int = 378
+    train_batch_size: int = 80#120 #256
+    val_batch_size: int = 80 #120 #256
+    num_batches_per_epoch: int = 252
 
 
 @dataclass
