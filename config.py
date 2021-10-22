@@ -46,14 +46,14 @@ class DataConfig:
 
 @dataclass
 class Config:
-    neptune_config: NeptuneConfig = NeptuneConfig()
-    trainer_config: TrainerConfig = TrainerConfig()
-    path_config: PathConfig = PathConfig()
-    data_config: DataConfig = DataConfig()
-    data_config.categorical_features += ["R", "C", "u_out"]
-    data_config.continuous_features += ["u_in"]
-    path_config.save_dir = os.path.join(path_config.save_dir, neptune_config.exp_name)
-    os.makedirs(path_config.save_dir, exist_ok=True)
+    neptune_cfg: NeptuneConfig = NeptuneConfig()
+    trainer_cfg: TrainerConfig = TrainerConfig()
+    path_cfg: PathConfig = PathConfig()
+    data_cfg: DataConfig = DataConfig()
+    data_cfg.categorical_features += ["R", "C", "u_out"]
+    data_cfg.continuous_features += ["u_in"]
+    path_cfg.save_dir = os.path.join(path_cfg.save_dir, neptune_cfg.exp_name)
+    os.makedirs(path_cfg.save_dir, exist_ok=True)
 
 
 def register_configs() -> None:

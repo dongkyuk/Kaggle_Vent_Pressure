@@ -16,13 +16,12 @@ class VentPressureDataset(Dataset):
         breath_id = self.breath_ids[idx]
         breath = self.breaths.get_group(breath_id)
 
-        target_dict = {self.cfg.data_config.target: torch.tensor(
-            breath[self.cfg.data_config.target].values, dtype=torch.float)}
-        timestep_dict = {self.cfg.data_config.timestep: torch.tensor(
-            breath[self.cfg.data_config.timestep].values, dtype=torch.float)}
-        categorical_feature_dict = {feature: torch.tensor(breath[feature].values, dtype=torch.float)
-                                    for feature in self.cfg.data_config.categorical_features}
-        continuous_feature_dict = {feature: torch.tensor(breath[feature].values, dtype=torch.float)
-                                   for feature in self.cfg.data_config.continuous_features}
+        target = {self.cfg.data_cfg.target: breath[self.cfg.data_cfg.target].values}
+        timestep = {self.cfg.data_cfg.timestep: breath[self.cfg.data_cfg.timestep].values}
+        categorical_features = {feature: breath[feature].values for feature in self.cfg.data_cfg.categorical_features}
+        continuous_features = {feature: breath[feature].values for feature in self.cfg.data_cfg.continuous_features}
 
-        return {**target_dict, **timestep_dict, **categorical_feature_dict, **continuous_feature_dict}
+        all_features = {**target, **timestep, **categorical_features, **continuous_features}
+        all_features.values() = [torch.tensor(i, dtype='float') for i in all_features.values()]
+
+        return all_features

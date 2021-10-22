@@ -5,18 +5,23 @@ from model.custom_blocks import MlpEncoder, Time2Vec
 
 class IndiviudalFeatureEncoder(nn.Module):
     def __init__(self, input_size, hidden_size):
+        """
+        Args:
+            input_size (int)
+            hidden_size (int)
+        """        
         super(IndiviudalFeatureEncoder, self).__init__()
-        # Embeddings for categorical features
+        # Learnable Embeddings for categorical features
         self.r_embedding = nn.Embedding(3, hidden_size)
         self.c_embedding = nn.Embedding(3, hidden_size)
         self.u_out_embedding = nn.Embedding(2, hidden_size)
 
-        # Mlp Encoders
+        # Mlp Encoders for continuous features
         self.u_in_encoder = MlpEncoder(
             input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
+
+        # Time2Vec Encoder for time_step
         self.timestep_encoder = Time2Vec(input_size, hidden_size)
-        # self.timestep_encoder = MlpEncoder(
-        #     input_size, hidden_size//2, hidden_size, 0, 'swish', 'ln')
 
     def forward(self, x):
         r_feat = self.r_embedding(x['R'].int())
@@ -29,6 +34,11 @@ class IndiviudalFeatureEncoder(nn.Module):
 
 class LstmHead(nn.Module):
     def __init__(self, input_size):
+        """LSTM with Mlp Regression Head
+
+        Args:
+            input_size (int)
+        """        
         super().__init__()
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=input_size,
                             num_layers=2, batch_first=True, bidirectional=True)
@@ -64,7 +74,7 @@ class TransformerOnly(nn.Module):
         self.transformer_decoder = nn.TransformerEncoder(
             decoder_layer, num_layers=12)
 
-        # LSTM
+        # LSTM Head
         self.lstm_head = LstmHead(hidden_size)
 
 
@@ -82,12 +92,12 @@ class TransformerOnly(nn.Module):
         feat = self.transformer_encoder(feat)[:, 0, :]
         feat = feat.view(-1, r_feat.shape[1], feat.shape[1])
 
-        # Decode with transformer decoder
+        # Decode with transformer decoder 
         # feat += timestep_feat  # [batch_size, seq_len, output_dim]
         feat = torch.cat([feat, timestep_feat], dim=-1)
         feat = self.transformer_decoder(feat)
 
-        # Pass sequence of fused features to LSTM
+        # Final Regression
         pred = self.lstm_head(feat)
 
         return pred

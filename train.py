@@ -19,7 +19,7 @@ from config import register_configs, Config
 
 @hydra.main(config_path=None, config_name="config")
 def train(cfg: Config) -> None:
-    pl.seed_everything(cfg.trainer_config.seed)
+    pl.seed_everything(cfg.trainer_cfg.seed)
     rank_zero_info(OmegaConf.to_yaml(cfg=cfg, resolve=True))
 
     datamodule = VentPressureDataModule(cfg=cfg, fold=0)
@@ -27,7 +27,7 @@ def train(cfg: Config) -> None:
 
     checkpoint_callback = ModelCheckpoint(
         monitor='val_loss',
-        dirpath=cfg.path_config.save_dir,
+        dirpath=cfg.path_cfg.save_dir,
         filename='{epoch:02d}-{val_loss:.4f}.ckpt',
         save_top_k=5,
         mode='min',
@@ -35,10 +35,10 @@ def train(cfg: Config) -> None:
 
     # Init trainer
     trainer_args = dict(
-        gpus=cfg.trainer_config.n_gpus,
+        gpus=cfg.trainer_cfg.n_gpus,
         accelerator="ddp",
         deterministic=True,
-        max_epochs=cfg.trainer_config.epoch,
+        max_epochs=cfg.trainer_cfg.epoch,
         callbacks=[checkpoint_callback],
         plugins=DDPPlugin(find_unused_parameters=False),
         auto_lr_find=True,
@@ -46,13 +46,13 @@ def train(cfg: Config) -> None:
         benchmark=True,
         precision=16,
     )
-    if cfg.neptune_config.use_neptune:
+    if cfg.neptune_cfg.use_neptune:
         logger = NeptuneLogger(
-            project_name=cfg.neptune_config.project_name,
-            experiment_name=cfg.neptune_config.exp_name,
+            project_name=cfg.neptune_cfg.project_name,
+            experiment_name=cfg.neptune_cfg.exp_name,
             upload_source_files=glob.glob(os.path.join(get_original_cwd(), '**/*.py'), recursive=True),
-            api_key=cfg.neptune_config.api_key,
-            description=cfg.neptune_config.description
+            api_key=cfg.neptune_cfg.api_key,
+            description=cfg.neptune_cfg.description
         )
         trainer_args['logger'] = logger
 

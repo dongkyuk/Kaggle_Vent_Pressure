@@ -11,25 +11,22 @@ class VentPressureDataModule(pl.LightningDataModule):
         super(VentPressureDataModule, self).__init__()
         self.cfg = cfg
         self.fold = fold
-        self.train_df = pd.read_csv(self.cfg.path_config.train_data_path)
-        self.test_df = pd.read_csv(self.cfg.path_config.test_data_path)
-        self._init_encoders()
-        self._fit_transform_encoders()
+        self.train_df = pd.read_csv(self.cfg.path_cfg.train_data_path)
+        self.test_df = pd.read_csv(self.cfg.path_cfg.test_data_path)
+        self._encode_categorical_features()
         self._assign_folds()
 
-    def _init_encoders(self):
+    def _encode_categorical_features(self):
         self.encoders = {
             'R': LabelEncoder(),
             'C': LabelEncoder(),
         }
-
-    def _fit_transform_encoders(self):
         for col in self.encoders:
             self.train_df[col] = self.encoders[col].fit_transform(self.train_df[col])
             self.test_df[col] = self.encoders[col].transform(self.test_df[col])
 
     def _assign_folds(self):
-        skf = GroupKFold(n_splits=self.cfg.trainer_config.fold_num)
+        skf = GroupKFold(n_splits=self.cfg.trainer_cfg.fold_num)
         for n, (_, val_index) in enumerate(
             skf.split(
                 X=self.train_df,
@@ -49,13 +46,13 @@ class VentPressureDataModule(pl.LightningDataModule):
             self.test_dataset = VentPressureDataset(self.cfg, self.test_df)
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.cfg.trainer_config.train_batch_size, num_workers=self.cfg.trainer_config.num_workers,
-                          shuffle=True, pin_memory=self.cfg.trainer_config.pin_memory, persistent_workers=self.cfg.trainer_config.persistent_workers)
+        return DataLoader(self.train_dataset, batch_size=self.cfg.trainer_cfg.train_batch_size, num_workers=self.cfg.trainer_cfg.num_workers,
+                          shuffle=True, pin_memory=self.cfg.trainer_cfg.pin_memory, persistent_workers=self.cfg.trainer_cfg.persistent_workers)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.cfg.trainer_config.val_batch_size, num_workers=self.cfg.trainer_config.num_workers,
-                          shuffle=False, pin_memory=self.cfg.trainer_config.pin_memory, persistent_workers=self.cfg.trainer_config.persistent_workers)
+        return DataLoader(self.val_dataset, batch_size=self.cfg.trainer_cfg.val_batch_size, num_workers=self.cfg.trainer_cfg.num_workers,
+                          shuffle=False, pin_memory=self.cfg.trainer_cfg.pin_memory, persistent_workers=self.cfg.trainer_cfg.persistent_workers)
 
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.cfg.trainer_config.val_batch_size, num_workers=self.cfg.trainer_config.num_workers,
-                          shuffle=False, pin_memory=self.cfg.trainer_config.pin_memory, persistent_workers=self.cfg.trainer_config.persistent_workers)
+        return DataLoader(self.test_dataset, batch_size=self.cfg.trainer_cfg.val_batch_size, num_workers=self.cfg.trainer_cfg.num_workers,
+                          shuffle=False, pin_memory=self.cfg.trainer_cfg.pin_memory, persistent_workers=self.cfg.trainer_cfg.persistent_workers)

@@ -9,16 +9,16 @@ class VentPressureModel(pl.LightningModule):
         self.cfg = cfg
         self.model = TransformerOnly()
         self.criterion = torch.nn.L1Loss()
-        self.lr = cfg.trainer_config.lr
+        self.lr = cfg.trainer_cfg.lr
 
     def forward(self, x):
         return self.model(x)
 
     def shared_step(self, batch, batch_idx):
         pressures_pred = self.forward(batch)
+        # Expiratory phase is not scored
         is_inhale = batch["u_out"] == 0
-        loss = self.criterion(
-            pressures_pred[is_inhale], batch['pressure'][is_inhale])
+        loss = self.criterion(pressures_pred[is_inhale], batch['pressure'][is_inhale])
         return loss
 
     def training_step(self, batch, batch_idx):

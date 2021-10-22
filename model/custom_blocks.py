@@ -4,6 +4,15 @@ import torch.nn as nn
 
 class MlpBlock(nn.Module):
     def __init__(self, input_size, output_size, act=None, norm=None, skip_connect=False):
+        """Single layer MLP block with activation and normalization
+
+        Args:
+            input_size (int)
+            output_size (int)
+            act (str, optional): Defaults to None.
+            norm (str, optional): Defaults to None.
+            skip_connect (bool, optional): Defaults to False.
+        """        
         super(MlpBlock, self).__init__()
         self.skip_connect = skip_connect
         self.fc = nn.Linear(input_size, output_size)
@@ -36,7 +45,17 @@ class MlpBlock(nn.Module):
 
 
 class MlpEncoder(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_hidden_layers, act, norm):
+    def __init__(self, input_size, hidden_size, output_size, num_hidden_layers, act=None, norm=None):
+        """Multi layer MLP encoder with activation and normalization
+
+        Args:
+            input_size (int)
+            hidden_size (int)
+            output_size (int)
+            num_hidden_layers (int)
+            act (str, optional): Defaults to None.
+            norm (str, optional): Defaults to None.
+        """        
         super(MlpEncoder, self).__init__()
         head = MlpBlock(input_size, hidden_size, act, norm)
         hidden = MlpBlock(hidden_size, hidden_size, act, norm, skip_connect=True)
@@ -50,6 +69,12 @@ class MlpEncoder(nn.Module):
 
 class Time2Vec(nn.Module):
     def __init__(self, input_size, output_size):
+        """Time2Vec: Learning a Vector Representation of Time
+
+        Args:
+            input_size (int)
+            output_size (int)
+        """        
         super().__init__()
         self.output_size = output_size
         self.w0 = nn.parameter.Parameter(torch.randn(input_size, 1))
